@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>鱼缸水生态系统模拟看板</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="app">
+    <!-- 页头 -->
+    <header class="head">
+      <div class="head-title">
+        <span class="head-emoji">🐟</span>
+        <h1>鱼缸水生态系统模拟看板</h1>
+      </div>
+      <div class="head-meta">
+        <span class="meta-chip" id="meta-time">时间 -- h</span>
+        <span class="meta-chip" id="meta-speed">速度 ×1</span>
+        <span class="meta-chip" id="meta-running">加载中…</span>
+      </div>
+    </header>
+
+    <!-- 生态健康 -->
+    <section class="panel health-panel">
+      <div class="health-label">生态健康指数</div>
+      <div class="health-bar">
+        <div class="health-fill" id="health-fill"></div>
+      </div>
+      <div class="health-num" id="health-num">-- / 100</div>
+    </section>
+
+    <!-- 种群统计 -->
+    <section class="panel">
+      <h2 class="panel-title">种群统计</h2>
+      <div class="pop-grid">
+        <div class="pop-card pop-fish">
+          <div class="pop-num" id="pop-fish">--</div>
+          <div class="pop-label">🐠 鱼</div>
+          <div class="pop-sub" id="pop-fish-age">--</div>
+        </div>
+        <div class="pop-card"><div class="pop-num" id="pop-plants">--</div><div class="pop-label">🌿 水草</div></div>
+        <div class="pop-card"><div class="pop-num" id="pop-bacteria">--</div><div class="pop-label">🦠 硝化细菌</div></div>
+        <div class="pop-card"><div class="pop-num" id="pop-food">--</div><div class="pop-label">🍤 食物</div></div>
+        <div class="pop-card"><div class="pop-num" id="pop-waste">--</div><div class="pop-label">🧹 废物</div></div>
+      </div>
+    </section>
+
+    <!-- 水质指标 -->
+    <section class="panel">
+      <h2 class="panel-title">水质指标</h2>
+      <div class="metric-grid" id="metric-grid"></div>
+    </section>
+
+    <!-- 趋势图 -->
+    <section class="panel">
+      <h2 class="panel-title">历史趋势</h2>
+      <canvas id="trend-chart" width="900" height="240"></canvas>
+    </section>
+
+    <!-- 外部条件控制 -->
+    <section class="panel">
+      <h2 class="panel-title">外部条件控制</h2>
+      <div class="controls">
+        <button class="btn" id="btn-pause">⏸ 暂停</button>
+        <button class="btn" id="btn-light">💡 关灯</button>
+        <button class="btn" id="btn-filter">🧹 过滤设备</button>
+        <button class="btn" id="btn-water">💧 加水</button>
+        <button class="btn btn-reset" id="btn-reset">↺ 重置</button>
+      </div>
+      <div class="water-info">
+        <span>💧 当前水量 <b id="water-volume">--</b> L</span>
+        <span>·</span>
+        <span>可养鱼上限 <b id="water-capacity">--</b> 条</span>
+      </div>
+      <div class="controls-adjust">
+        <div class="adjust-item" data-action="feed">
+          <span class="adjust-label">🍤 喂食</span>
+          <button class="btn btn-mini" data-adjust="minus">−</button>
+          <span class="adjust-count" data-count>1</span>
+          <button class="btn btn-mini" data-adjust="plus">＋</button>
+          <button class="btn btn-apply" data-apply>一次 +1 份</button>
+        </div>
+        <div class="adjust-item" data-action="add-plants">
+          <span class="adjust-label">🌿 加草</span>
+          <button class="btn btn-mini" data-adjust="minus">−</button>
+          <span class="adjust-count" data-count>1</span>
+          <button class="btn btn-mini" data-adjust="plus">＋</button>
+          <button class="btn btn-apply" data-apply>一次 +1 份</button>
+        </div>
+        <div class="adjust-item" data-action="add-bacteria">
+          <span class="adjust-label">🦠 补菌</span>
+          <button class="btn btn-mini" data-adjust="minus">−</button>
+          <span class="adjust-count" data-count>1</span>
+          <button class="btn btn-mini" data-adjust="plus">＋</button>
+          <button class="btn btn-apply" data-apply>一次 +1 份</button>
+        </div>
+        <div class="adjust-item" data-action="add-fish">
+          <span class="adjust-label">🐠 加鱼</span>
+          <button class="btn btn-mini" data-adjust="minus">−</button>
+          <span class="adjust-count" data-count>1</span>
+          <button class="btn btn-mini" data-adjust="plus">＋</button>
+          <button class="btn btn-apply" data-apply>一次 +1 份</button>
+        </div>
+      </div>
+      <div class="sliders">
+        <div class="slider-row">
+          <span class="slider-label" id="slider-speed-label">速度 ×1</span>
+          <input type="range" id="slider-speed" min="0.1" max="10" step="0.1" value="1" />
+        </div>
+      </div>
+
+      <!-- 温度设置：恒温 / 昼夜 两模式 -->
+      <div class="panel-temp">
+        <div class="temp-head">
+          <span class="temp-current">当前温度 <b id="temp-current">26.0</b>°C</span>
+          <div class="temp-mode-switch">
+            <button class="btn btn-mode" id="btn-mode-constant">恒温</button>
+            <button class="btn btn-mode" id="btn-mode-daynight">昼夜循环</button>
+          </div>
+        </div>
+
+        <!-- 恒温模式 -->
+        <div class="temp-constant" id="temp-panel-constant">
+          <div class="slider-row">
+            <span class="slider-label" id="slider-temp-set-label">目标温度 26°C</span>
+            <input type="range" id="slider-temp-set" min="4" max="35" step="1" value="26" />
+          </div>
+        </div>
+
+        <!-- 昼夜模式 -->
+        <div class="temp-daynight" id="temp-panel-daynight">
+          <div class="temp-range-grid">
+            <div class="slider-row">
+              <span class="slider-label" id="slider-temp-min-label">最低温 24°C</span>
+              <input type="range" id="slider-temp-min" min="4" max="35" step="1" value="24" />
+            </div>
+            <div class="slider-row">
+              <span class="slider-label" id="slider-temp-max-label">最高温 28°C</span>
+              <input type="range" id="slider-temp-max" min="4" max="35" step="1" value="28" />
+            </div>
+            <div class="slider-row">
+              <span class="slider-label" id="slider-day-hours-label">昼长 12h</span>
+              <input type="range" id="slider-day-hours" min="1" max="24" step="1" value="12" />
+            </div>
+            <div class="slider-row">
+              <span class="slider-label" id="slider-night-hours-label">夜长 12h</span>
+              <input type="range" id="slider-night-hours" min="1" max="24" step="1" value="12" />
+            </div>
+          </div>
+          <div class="temp-hint">昼夜循环：温度在最低~最高温之间按昼长/夜长平滑波动（白天升温、夜晚降温）。</div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="foot">
+      <span>后台服务：FastAPI · 模拟引擎每 0.5s 步进 · 数据每 1s 刷新</span>
+    </footer>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

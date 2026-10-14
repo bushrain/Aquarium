@@ -1,0 +1,3 @@
+# 桌面前台（PySide6 桌面应用）
+PySide6>=6.6
+requests>=2.31
